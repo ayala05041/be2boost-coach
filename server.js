@@ -11,7 +11,7 @@ const jobs=new Map();
 setInterval(()=>{const t=Date.now();for(const[k,v]of jobs)if(t-v.t>30*60*1000)jobs.delete(k)},60000).unref();
 
 const authOk=req=>{const a=Buffer.from(String(req.headers['x-app-password']||'')),b=Buffer.from(PW);return a.length===b.length&&crypto.timingSafeEqual(a,b)};
-const send=(res,code,obj)=>{res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(obj))};
+const send=(res,code,obj)=>{if(res.headersSent){res.end();return}res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'});res.end(JSON.stringify(obj))};
 const readBody=(req,max)=>new Promise((ok,no)=>{const c=[];let n=0;req.on('data',d=>{n+=d.length;if(n>max){no(new Error('too_large'));req.destroy();return}c.push(d)});req.on('end',()=>ok(Buffer.concat(c)));req.on('error',no)});
 
 async function transcribe(buf,name,mime){
@@ -48,7 +48,7 @@ http.createServer(async(req,res)=>{
   try{
     const u=new URL(req.url,'http://x');
     if(u.pathname==='/health')return send(res,200,{ok:true});
-    if(req.method==='GET'&&(u.pathname==='/'||u.pathname==='/index.html')){res.writeHead(200,{'content-type':MIME['.html']});return res.end(fs.readFileSync(path.join(__dirname,'public','index.html')))}
+    if(req.method==='GET'&&(u.pathname==='/'||u.pathname==='/index.html')){let page;try{page=fs.existsSync(path.join(__dirname,'public','index.html'))?fs.readFileSync(path.join(__dirname,'public','index.html')):fs.readFileSync(path.join(__dirname,'index.html'))}catch(e){console.error('חסר הקובץ public/index.html במאגר');return send(res,500,{error:'missing_index'})}res.writeHead(200,{'content-type':MIME['.html']});return res.end(page)}
     if(!u.pathname.startsWith('/api/'))return send(res,404,{error:'not_found'});
     if(!authOk(req))return send(res,401,{error:'unauthorized'});
     if(u.pathname==='/api/check')return send(res,200,{ok:true});
@@ -69,3 +69,4 @@ http.createServer(async(req,res)=>{
     send(res,404,{error:'not_found'});
   }catch(e){send(res,500,{error:'server'})}
 }).listen(PORT,()=>console.log('be2boost coach on '+PORT));
+process.on('unhandledRejection',e=>console.error('unhandled',e&&e.message));process.on('uncaughtException',e=>console.error('uncaught',e&&e.message));
