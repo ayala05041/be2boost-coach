@@ -40,7 +40,7 @@ async function run(id,buf,name,mime,type,isText){
     else{job.status='transcribing';tr=await transcribe(buf,name,mime)}
     if(tr.trim().length<200)throw new Error('short');
     job.transcript=tr;job.status='analyzing';
-    job.result=await analyze(tr,type);job.status='done';
+    job.result=await analyze(tr,type).catch(()=>analyze(tr,type));;job.status='done';
   }catch(e){job.status='error';job.error=e.message}
 }
 const MIME={'.html':'text/html; charset=utf-8','.jpg':'image/jpeg'};
