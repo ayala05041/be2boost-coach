@@ -76,7 +76,7 @@ $('go').onclick=async()=>{
    if(p.status==='error')throw new Error(p.error);
    $('st').textContent=MSG[p.status]||'מעבדת...';
   }
- }catch(e){$('st').textContent=ERR[e.message]||'הניתוח נכשל ('+e.message+'). נסי שוב או פני לאילה.''}
+ }catch(e){$('st').textContent=ERR[e.message]||'הניתוח נכשל ('+e.message+'). נסי שוב או פני לאילה.'}
  $('go').disabled=false};
 function render(d,rep){
  const o=$('out');o.replaceChildren();
