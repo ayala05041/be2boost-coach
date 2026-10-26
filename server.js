@@ -23,7 +23,7 @@ async function transcribe(buf,name,mime){
   const j=await r.json();return j.text||'';
 }
 async function analyze(transcript,type){
-  const user='סוג השיחה: '+type+'\n\nהערה: התמלול אוטומטי וללא סימון דוברים. הסק מההקשר מי הנציגה ומי הלקוחה, וציין זאת בשדה assumptions.\n\nתמלול:\n'+transcript;
+  const user='סוג השיחה: '+type+'\n\nהערה: התמלול אוטומטי וללא סימון דוברים. הסק מההקשר מי הנציגה ומי הלקוחה, וציין זאת בשדה assumptions.\n\nתמלול:\n'+transcript חשוב: בתוך ערכי המחרוזות ב-JSON אל תשתמש בתו מרכאות כפולות; כתוב ציטוטים בתוך ״ ״ (מרכאות עבריות) או בגרשיים. החזר JSON תקין בלבד.;
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
     headers:{'x-api-key':AKEY,'anthropic-version':'2023-06-01','content-type':'application/json'},
     body:JSON.stringify({model:MODEL,max_tokens:6000,system:SYS,messages:[{role:'user',content:user}]})});
